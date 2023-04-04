@@ -1,0 +1,55 @@
+import folium
+
+# Učitajte podlogu OpenStreetMap
+m = folium.Map(location=[44, 18], zoom_start=8, tiles='OpenStreetMap')
+
+# Učitajte GeoJSON datoteku s podacima o opštinama
+opstine_geojson = r'F:\Klimatski atlas BiH\Temperaturne stanice\Opstine BiH.geojson'
+
+# Učitajte GeoJSON datoteku s podacima o Temperaturnim stanicama
+temperaturne_stanice_geojson = r'F:\Klimatski atlas BiH\Temperaturne stanice\Temperaturne stanice.geojson'
+
+# Definišite funkciju za dobijanje boje u zavisnosti od gustine stanovnika
+def get_color(population):
+    if population < 50:
+        return 'green'
+    elif population < 100:
+        return 'orange'
+    else:
+        return 'red'
+
+# Dodajte GeoJSON sloj s podacima o opštinama na mapu
+opstine = folium.GeoJson(
+    opstine_geojson,
+    name='Opstine BiH',
+    tooltip=folium.features.GeoJsonTooltip(fields=['Naziv', 'Br_stanovn', 'Povrs_km2', 'Gustina st']),
+    style_function=lambda feature: {
+        'color': get_color(feature['properties']['Gustina st']),
+        'weight': 1, 
+        'fillOpacity': 0.3
+    }
+).add_to(m)
+
+# Dodajte GeoJSON sloj s podacima o temperaturnim stanicama na mapu
+temperatura = folium.GeoJson(
+    temperaturne_stanice_geojson,
+    name='Temperaturne stanice',
+    tooltip=folium.features.GeoJsonTooltip(fields=['F1', 'GODISNJE']),
+    
+    style_function=lambda feature: {
+        'fillOpacity': 0.2,
+        'color': 'black',
+        'weight': 1,
+        'markerColor': 'red',
+        'markerSize': 8,
+        'icon': folium.Icon(color='red'),
+        'popup': feature['properties']['F1'],
+        'tooltip': feature['properties']['GODISNJE']
+    }
+).add_to(m)
+
+# dodajte kontrolu slojeva na mapu
+folium.LayerControl().add_to(m)
+
+# prikažite mapu
+m
